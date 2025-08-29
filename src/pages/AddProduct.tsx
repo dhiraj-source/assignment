@@ -171,6 +171,8 @@ export default function AddProduct() {
       { shouldValidate: true }
     );
   };
+  // IN COMBINATION SECTION IF THE INSTOCK IS FALSE THEN SET VALUE TO NULL
+
 
   // ---------- Combinations step ----------
   const combinationsForm = useForm<CombinationsStepForm>({
@@ -308,9 +310,9 @@ export default function AddProduct() {
 
     const discount: Discount | undefined = data.discount
       ? {
-          method: data.discount.method,
-          value: data.discount.value,
-        }
+        method: data.discount.method,
+        value: data.discount.value,
+      }
       : { method: "pct", value: 0 };
 
     const newProduct: Product = {
@@ -443,8 +445,8 @@ export default function AddProduct() {
                       currentStep > index + 1
                         ? "text-blue-600 bg-[#DAEDF9] font-medium px-4 py-1 rounded-lg"
                         : currentStep === index + 1
-                        ? "bg-[#DAEDF9] font-medium px-4 py-1 rounded-lg text-blue-500"
-                        : "text-gray-500"
+                          ? "bg-[#DAEDF9] font-medium px-4 py-1 rounded-lg text-blue-500"
+                          : "text-gray-500"
                     }
                     onClick={(e) => {
                       e.preventDefault();
@@ -661,10 +663,10 @@ export default function AddProduct() {
                       <div>
                         {variantsForm.formState.errors.variants?.[vIdx]
                           ?.name && (
-                          <p className="text-sm text-destructive pl-4 -mt-4">
-                            {`${variantsForm.formState.errors.variants?.[vIdx]?.name?.message} And ${variantsForm.formState.errors.variants?.[vIdx]?.values?.message}`}
-                          </p>
-                        )}
+                            <p className="text-sm text-destructive pl-4 -mt-4">
+                              {`${variantsForm.formState.errors.variants?.[vIdx]?.name?.message} And ${variantsForm.formState.errors.variants?.[vIdx]?.values?.message}`}
+                            </p>
+                          )}
                       </div>
                     </>
                   ))}
@@ -689,9 +691,13 @@ export default function AddProduct() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold">Combinations</h2>
+                {/* <p className="text-sm text-muted-foreground">
+    Please fill in SKU and quantity for each combination
+  </p> */}
 
                 {generatedCombinations.length > 0 ? (
                   <div className="space-y-4">
+                    {/* Header Row */}
                     <div className="grid md:grid-cols-6 gap-4 px-4">
                       <Label className="col-span-1"></Label>
                       <Label className="col-span-2">SKU *</Label>
@@ -701,15 +707,11 @@ export default function AddProduct() {
 
                     {generatedCombinations.map((combo, cIdx) => {
                       const name = combo.map((c) => c.value).join("/");
-                      const currentSku =
-                        combinationsForm.watch(`combinations.${cIdx}.sku`) ||
-                        "";
+                      const currentSku = combinationsForm.watch(`combinations.${cIdx}.sku`) || "";
 
-                      // Checking for duplicate SKUs
-                      const allSkus = generatedCombinations.map(
-                        (_, idx) =>
-                          combinationsForm.watch(`combinations.${idx}.sku`) ||
-                          ""
+                      // Check for duplicate SKUs
+                      const allSkus = generatedCombinations.map((_, idx) =>
+                        combinationsForm.watch(`combinations.${idx}.sku`) || ""
                       );
                       const isDuplicate =
                         currentSku &&
@@ -720,7 +722,7 @@ export default function AddProduct() {
                           key={cIdx}
                           className="p-4 grid md:grid-cols-6 gap-4 items-start"
                         >
-                          {/* Combination */}
+                          {/* Combination name (read-only) */}
                           <div className="col-span-1">
                             <Input
                               value={name}
@@ -729,9 +731,7 @@ export default function AddProduct() {
                             />
                             <input
                               type="hidden"
-                              {...combinationsForm.register(
-                                `combinations.${cIdx}.name`
-                              )}
+                              {...combinationsForm.register(`combinations.${cIdx}.name`)}
                               value={name}
                             />
                           </div>
@@ -740,32 +740,24 @@ export default function AddProduct() {
                           <div className="col-span-2">
                             <Input
                               placeholder="e.g. ABC12"
-                              {...combinationsForm.register(
-                                `combinations.${cIdx}.sku`,
-                                {
-                                  required: true,
-                                }
-                              )}
+                              {...combinationsForm.register(`combinations.${cIdx}.sku`, {
+                                required: true,
+                              })}
                               className={
                                 isDuplicate ||
-                                combinationsForm.formState.errors
-                                  .combinations?.[cIdx]?.sku
+                                  combinationsForm.formState.errors.combinations?.[cIdx]?.sku
                                   ? "border-destructive"
                                   : ""
                               }
                             />
                             {isDuplicate && (
-                              <p className="text-sm text-destructive">
-                                Duplicate SKU
-                              </p>
+                              <p className="text-sm text-destructive">Duplicate SKU</p>
                             )}
-                            {combinationsForm.formState.errors.combinations?.[
-                              cIdx
-                            ]?.sku && (
+                            {combinationsForm.formState.errors.combinations?.[cIdx]?.sku && (
                               <p className="text-sm text-destructive">
                                 {
-                                  combinationsForm.formState.errors
-                                    .combinations?.[cIdx]?.sku?.message
+                                  combinationsForm.formState.errors.combinations?.[cIdx]?.sku
+                                    ?.message
                                 }
                               </p>
                             )}
@@ -775,91 +767,55 @@ export default function AddProduct() {
                           <div className="col-span-1">
                             <div className="">
                               <Switch
-                                checked={
-                                  !!combinationsForm.watch(
-                                    `combinations.${cIdx}.inStock`
-                                  )
-                                }
+                                checked={!!combinationsForm.watch(`combinations.${cIdx}.inStock`)}
                                 onCheckedChange={(val) => {
-                                  combinationsForm.setValue(
-                                    `combinations.${cIdx}.inStock`,
-                                    val,
-                                    {
-                                      shouldValidate: true,
-                                    }
-                                  );
+                                  combinationsForm.setValue(`combinations.${cIdx}.inStock`, val, {
+                                    shouldValidate: true,
+                                  });
                                   if (!val) {
-                                    combinationsForm.setValue(
-                                      `combinations.${cIdx}.quantity`,
-                                      null,
-                                      {
-                                        shouldValidate: true,
-                                      }
-                                    );
+                                    combinationsForm.setValue(`combinations.${cIdx}.quantity`, null, {
+                                      shouldValidate: true,
+                                    });
                                   }
                                 }}
                               />
+
                             </div>
                           </div>
 
+                          {/* Quantity */}
                           {/* Quantity */}
                           <div className="col-span-2">
                             <Input
                               type="number"
                               placeholder="0"
-                              disabled={
-                                !combinationsForm.watch(
-                                  `combinations.${cIdx}.inStock`
-                                )
-                              }
+                              disabled={!combinationsForm.watch(`combinations.${cIdx}.inStock`)}
                               value={
-                                combinationsForm.watch(
-                                  `combinations.${cIdx}.inStock`
-                                )
-                                  ? combinationsForm.watch(
-                                      `combinations.${cIdx}.quantity`
-                                    ) ?? ""
+                                combinationsForm.watch(`combinations.${cIdx}.inStock`)
+                                  ? combinationsForm.watch(`combinations.${cIdx}.quantity`) ?? ""
                                   : ""
                               }
-                              onChange={(e) => {
-                                if (
-                                  !combinationsForm.watch(
-                                    `combinations.${cIdx}.inStock`
-                                  )
-                                ) {
-                                  combinationsForm.setValue(
-                                    `combinations.${cIdx}.quantity`,
-                                    null,
-                                    { shouldValidate: true }
-                                  );
-                                } else {
-                                  combinationsForm.setValue(
-                                    `combinations.${cIdx}.quantity`,
-                                    e.target.value === ""
-                                      ? null
-                                      : Number(e.target.value),
-                                    { shouldValidate: true }
-                                  );
-                                }
-                              }}
+                              onChange={(e) =>
+                                combinationsForm.setValue(
+                                  `combinations.${cIdx}.quantity`,
+                                  e.target.value === "" ? null : Number(e.target.value),
+                                  { shouldValidate: true }
+                                )
+                              }
                               className={
-                                combinationsForm.formState.errors
-                                  .combinations?.[cIdx]?.quantity
+                                combinationsForm.formState.errors.combinations?.[cIdx]?.quantity
                                   ? "border-destructive"
                                   : ""
                               }
                             />
-                            {combinationsForm.formState.errors.combinations?.[
-                              cIdx
-                            ]?.quantity && (
+                            {combinationsForm.formState.errors.combinations?.[cIdx]?.quantity && (
                               <p className="text-sm text-destructive">
-                                {
-                                  combinationsForm.formState.errors
-                                    .combinations?.[cIdx]?.quantity?.message
-                                }
+                                {combinationsForm.formState.errors.combinations?.[cIdx]?.quantity?.message}
                               </p>
                             )}
                           </div>
+
+
                         </div>
                       );
                     })}
@@ -870,6 +826,7 @@ export default function AddProduct() {
                   </p>
                 )}
               </div>
+
             )}
 
             {currentStep === 4 && (
@@ -928,11 +885,10 @@ export default function AddProduct() {
                     <div className="flex rounded-md border bg-muted text-sm font-medium">
                       <button
                         type="button"
-                        className={`px-3 py-1.5 rounded-l-md ${
-                          priceForm.watch("discount")?.method === "pct"
-                            ? "bg-primary text-white"
-                            : "text-muted-foreground"
-                        }`}
+                        className={`px-3 py-1.5 rounded-l-md ${priceForm.watch("discount")?.method === "pct"
+                          ? "bg-primary text-white"
+                          : "text-muted-foreground"
+                          }`}
                         onClick={() => {
                           const currentDiscount =
                             priceForm.getValues("discount");
@@ -950,11 +906,10 @@ export default function AddProduct() {
                       </button>
                       <button
                         type="button"
-                        className={`px-3 py-1.5 rounded-r-md ${
-                          priceForm.watch("discount")?.method === "flat"
-                            ? "bg-primary text-white"
-                            : "text-muted-foreground"
-                        }`}
+                        className={`px-3 py-1.5 rounded-r-md ${priceForm.watch("discount")?.method === "flat"
+                          ? "bg-primary text-white"
+                          : "text-muted-foreground"
+                          }`}
                         onClick={() => {
                           const currentDiscount =
                             priceForm.getValues("discount");

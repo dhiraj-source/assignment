@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Step 1: Description
+// Description
 export const basicInfoSchema = z.object({
   name: z.string().min(1, 'Product name is required').max(50, 'Name must be less than 50 characters'),
   brand: z.string().min(2, 'Brand must be at least 2 characters').max(100, 'Brand must be less than 100 characters'),
@@ -8,13 +8,13 @@ export const basicInfoSchema = z.object({
   image: z.string().url('Please provide a valid image URL'), 
 });
 
-// Step 2: Variants
+//  Variants
 export const variantOptionSchema = z.object({
   name: z.string().min(1, 'Option can’t be empty'),
   values: z.array(z.string().min(1, 'Value cannot be empty')).min(1, 'At least one value is required'),
 });
 
-// Step 3: Combinations
+//  Combinations
 // export const combinationSchema = z.object({
 //   name: z.string().min(1, 'Combination name is required'),
 //   sku: z.string().min(1, 'SKU is required'),
@@ -39,7 +39,7 @@ export const combinationSchema = z.object({
 });
 
 
-// // Step 4: Price Info
+// Price Info
 // export const pricingInventorySchema = z.object({
 //   priceInr: z.number().min(0.01, 'Price must be greater than 0'),
 //   discount: z.object({
@@ -61,7 +61,6 @@ export const pricingInventorySchema = z.object({
     .optional(),
 });
 
-// Removed image from here, only keeping status
 export const mediaDetailsSchema = z.object({
   status: z.enum(['published', 'draft']),
 });
@@ -71,7 +70,7 @@ export const categorySchema = z.object({
   name: z.string().min(1, 'Category name is required').max(50, 'Name must be less than 50 characters'),
 });
 
-// 🔥 Complete product schema
+// Complete product schema
 export const completeProductSchema = basicInfoSchema
   .merge(pricingInventorySchema)
   .merge(mediaDetailsSchema)
@@ -80,7 +79,7 @@ export const completeProductSchema = basicInfoSchema
     combinations: z.array(combinationSchema),
   });
 
-// ✅ Types
+// Types
 export type BasicInfoForm = z.infer<typeof basicInfoSchema>;
 export type PricingInventoryForm = z.infer<typeof pricingInventorySchema>;
 export type MediaDetailsForm = z.infer<typeof mediaDetailsSchema>;
