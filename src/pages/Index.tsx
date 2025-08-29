@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useAtom } from "jotai";
 import Layout from "@/components/Layout";
-import ProductCard from "@/components/ProductCard";
 import ProductsHeader from "@/components/ProductsHeader";
-
 import CategoryModal from "@/components/CategoryModal";
 import { categoriesAtom, productsAtom, activeCategoryAtom } from "@/lib/store";
 import { useNavigate } from "react-router-dom";
