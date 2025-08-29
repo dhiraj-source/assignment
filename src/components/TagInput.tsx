@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils"; // if you have className utility
 
 export function TagInput({ value = [], onChange, placeholder ,className}) {
