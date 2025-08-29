@@ -3,12 +3,12 @@ import { useAtom } from "jotai";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import ProductsHeader from "@/components/ProductsHeader";
-import CategoryTabs from "@/components/CategoryTabs";
+
 import CategoryModal from "@/components/CategoryModal";
 import { categoriesAtom, productsAtom, activeCategoryAtom } from "@/lib/store";
 import { useNavigate } from "react-router-dom";
 import { Product } from "@/types";
-import { Badge } from "@/components/ui/badge";
+
 
 
 const Index = () => {
