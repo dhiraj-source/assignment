@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import { categoriesAtom, productsAtom } from "@/lib/store";
@@ -37,16 +41,20 @@ import { TagInput } from "@/components/TagInput";
 
 // ---------- Local helper schemas/types  ----------
 const variantsStepSchema = z.object({
-  variants: z.array(variantOptionSchema).min(1, "At least one variant option is required"),
+  variants: z
+    .array(variantOptionSchema)
+    .min(1, "At least one variant option is required"),
 });
 type VariantsStepForm = z.infer<typeof variantsStepSchema>;
 
 const combinationsStepSchema = z.object({
-  combinations: z.array(combinationSchema).min(1, "Add at least one combination"),
+  combinations: z
+    .array(combinationSchema)
+    .min(1, "Add at least one combination"),
 });
 type CombinationsStepForm = z.infer<typeof combinationsStepSchema>;
 
-// pricingInventorySchema 
+// pricingInventorySchema
 type PriceInfoForm = z.infer<typeof pricingInventorySchema>;
 
 // ---------- UI step labels ----------
@@ -56,14 +64,20 @@ const STEPS = [
   { id: 3, title: "Combinations" },
   { id: 4, title: "Price Info" },
 ];
-const breadcrumbSteps = ["Description", "Variants", "Combinations", "Price info"];
+const breadcrumbSteps = [
+  "Description",
+  "Variants",
+  "Combinations",
+  "Price info",
+];
 
-
-// Draft record shape for IndexedDB 
+// Draft record shape for IndexedDB
 type DraftRecord = {
   id: string;
   step: number;
-  data: Partial<BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm>;
+  data: Partial<
+    BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm
+  >;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -73,7 +87,11 @@ export default function AddProduct() {
   const [categories] = useAtom(categoriesAtom);
   const [products, setProducts] = useAtom(productsAtom);
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<Partial<BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm>>({});
+  const [formData, setFormData] = useState<
+    Partial<
+      BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm
+    >
+  >({});
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -131,14 +149,19 @@ export default function AddProduct() {
           : [{ name: "Size", values: ["M", "L"] }],
     },
     values: {
-      variants: formData.variants && formData.variants.length ? formData.variants : [{ name: "Size", values: ["M", "L"] }],
+      variants:
+        formData.variants && formData.variants.length
+          ? formData.variants
+          : [{ name: "Size", values: ["M", "L"] }],
     },
   });
 
   // helpers for varients
   const addVariant = () => {
     const current = variantsForm.getValues("variants") || [];
-    variantsForm.setValue("variants", [...current, { name: "", values: [] }], { shouldValidate: true });
+    variantsForm.setValue("variants", [...current, { name: "", values: [] }], {
+      shouldValidate: true,
+    });
   };
   const removeVariant = (idx: number) => {
     const current = variantsForm.getValues("variants") || [];
@@ -153,23 +176,28 @@ export default function AddProduct() {
   const combinationsForm = useForm<CombinationsStepForm>({
     resolver: zodResolver(combinationsStepSchema),
     defaultValues: {
-      combinations: formData.combinations || []
+      combinations: formData.combinations || [],
     },
     values: {
-      combinations: formData.combinations || []
+      combinations: formData.combinations || [],
     },
   });
 
-  // Generating combinations from variants 
+  // Generating combinations from variants
   const generatedCombinations = useMemo(() => {
     const variants = variantsForm.watch("variants") || [];
 
-    const generateCombinations = (arr: { name: string; values: string[] }[]) => {
+    const generateCombinations = (
+      arr: { name: string; values: string[] }[]
+    ) => {
       if (!arr.length) return [];
       return arr.reduce(
         (acc, variant) =>
           acc.flatMap((comb) =>
-            variant.values.map((val) => [...comb, { option: variant.name, value: val }])
+            variant.values.map((val) => [
+              ...comb,
+              { option: variant.name, value: val },
+            ])
           ),
         [[]] as { option: string; value: string }[][]
       );
@@ -181,14 +209,15 @@ export default function AddProduct() {
   // initiating the combinations when variants change
   useEffect(() => {
     if (generatedCombinations.length > 0 && currentStep === 3) {
-      const currentCombinations = combinationsForm.getValues("combinations") || {};
+      const currentCombinations =
+        combinationsForm.getValues("combinations") || {};
 
-
-      if (Object.keys(currentCombinations).length !== generatedCombinations.length) {
+      if (
+        Object.keys(currentCombinations).length !== generatedCombinations.length
+      ) {
         const newCombinations = generatedCombinations.map((combo, index) => {
-
           const existing = currentCombinations[index] || {};
-          console.log("exssiting====================>>>>>", existing)
+          console.log("exssiting====================>>>>>", existing);
           return {
             name: combo.map((c) => c.value).join("/"),
             sku: existing.sku || "",
@@ -197,7 +226,9 @@ export default function AddProduct() {
           };
         });
 
-        combinationsForm.setValue("combinations", newCombinations, { shouldValidate: true });
+        combinationsForm.setValue("combinations", newCombinations, {
+          shouldValidate: true,
+        });
         console.log("Initialized combinations:", newCombinations);
       }
     }
@@ -220,7 +251,9 @@ export default function AddProduct() {
 
   // ---------- Draft save helper ----------
   const saveDraft = async (
-    stepData: Partial<BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm>,
+    stepData: Partial<
+      BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm
+    >,
     step: number
   ) => {
     const updatedData = { ...formData, ...stepData };
@@ -248,7 +281,9 @@ export default function AddProduct() {
 
   // Next button handler function for saving data to draft at each step
   const handleNext = async (
-    stepData: Partial<BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm>
+    stepData: Partial<
+      BasicInfoForm & VariantsStepForm & CombinationsStepForm & PriceInfoForm
+    >
   ) => {
     console.log("handleNext called with step:", currentStep, "data:", stepData);
     await saveDraft(stepData, currentStep + 1);
@@ -269,13 +304,13 @@ export default function AddProduct() {
       return acc;
     }, {} as Record<string, CombinationType>);
 
-    const priceInr = (data.priceInr || 0);
+    const priceInr = data.priceInr || 0;
 
     const discount: Discount | undefined = data.discount
       ? {
-        method: data.discount.method,
-        value: data.discount.value,
-      }
+          method: data.discount.method,
+          value: data.discount.value,
+        }
       : { method: "pct", value: 0 };
 
     const newProduct: Product = {
@@ -290,7 +325,7 @@ export default function AddProduct() {
       discount: discount!,
     };
 
-    console.log("beforee the submission==============>>>", newProduct)
+    console.log("beforee the submission==============>>>", newProduct);
     try {
       setProducts([...products, newProduct]);
 
@@ -327,50 +362,60 @@ export default function AddProduct() {
 
     if (currentStep === 1) {
       console.log("Submitting step 1");
-      basicInfoForm.handleSubmit((data) => {
-        console.log("Step 1 data validated:", data);
-        handleNext(data);
-      }, (errors) => {
-        console.log("Step 1 validation errors:", errors);
-      })();
-    }
-    else if (currentStep === 2) {
+      basicInfoForm.handleSubmit(
+        (data) => {
+          console.log("Step 1 data validated:", data);
+          handleNext(data);
+        },
+        (errors) => {
+          console.log("Step 1 validation errors:", errors);
+        }
+      )();
+    } else if (currentStep === 2) {
       console.log("Submitting step 2");
-      variantsForm.handleSubmit((data) => {
-        console.log("Step 2 data validated:", data);
-        handleNext(data);
-      }, (errors) => {
-        console.log("Step 2 validation errors:", errors);
-      })();
-    }
-    else if (currentStep === 3) {
+      variantsForm.handleSubmit(
+        (data) => {
+          console.log("Step 2 data validated:", data);
+          handleNext(data);
+        },
+        (errors) => {
+          console.log("Step 2 validation errors:", errors);
+        }
+      )();
+    } else if (currentStep === 3) {
       console.log("Submitting step 3");
       console.log("Current combinations data:", combinationsForm.getValues());
 
-      combinationsForm.handleSubmit((data) => {
-        console.log("Step 3 data validated:", data);
-        handleNext(data);
-      }, (errors) => {
-        console.log("Step 3 validation errors:", errors);
-        // Check for specific combination errors
-        if (errors.combinations) {
-          console.log("Combination errors details:", errors.combinations);
-          toast({
-            title: "Validation Error",
-            description: "Please fix all combination errors before proceeding",
-            variant: "destructive"
-          });
+      combinationsForm.handleSubmit(
+        (data) => {
+          console.log("Step 3 data validated:", data);
+          handleNext(data);
+        },
+        (errors) => {
+          console.log("Step 3 validation errors:", errors);
+          // Check for specific combination errors
+          if (errors.combinations) {
+            console.log("Combination errors details:", errors.combinations);
+            toast({
+              title: "Validation Error",
+              description:
+                "Please fix all combination errors before proceeding",
+              variant: "destructive",
+            });
+          }
         }
-      })();
-    }
-    else {
+      )();
+    } else {
       console.log("Submitting final step");
-      priceForm.handleSubmit((data) => {
-        console.log("Final step data validated:", data);
-        handleComplete(data);
-      }, (errors) => {
-        console.log("Final step validation errors:", errors);
-      })();
+      priceForm.handleSubmit(
+        (data) => {
+          console.log("Final step data validated:", data);
+          handleComplete(data);
+        },
+        (errors) => {
+          console.log("Final step validation errors:", errors);
+        }
+      )();
     }
   };
 
@@ -378,7 +423,10 @@ export default function AddProduct() {
     <Layout>
       <ProductsHeader
         heading="Add Product"
-        buttonContent={{ first: "Cancel", second: currentStep < STEPS.length ? "Next" : "Save Product" }}
+        buttonContent={{
+          first: "Cancel",
+          second: currentStep < STEPS.length ? "Next" : "Save Product",
+        }}
         firstBtn={handleSaveDraft}
         secondBtn={handleNextBtn}
       />
@@ -395,8 +443,8 @@ export default function AddProduct() {
                       currentStep > index + 1
                         ? "text-blue-600 bg-[#DAEDF9] font-medium px-4 py-1 rounded-lg"
                         : currentStep === index + 1
-                          ? "bg-[#DAEDF9] font-medium px-4 py-1 rounded-lg text-blue-500"
-                          : "text-gray-500"
+                        ? "bg-[#DAEDF9] font-medium px-4 py-1 rounded-lg text-blue-500"
+                        : "text-gray-500"
                     }
                     onClick={(e) => {
                       e.preventDefault();
@@ -428,7 +476,11 @@ export default function AddProduct() {
                       id="name"
                       placeholder="Enter product name"
                       {...basicInfoForm.register("name")}
-                      className={basicInfoForm.formState.errors.name ? "border-destructive" : ""}
+                      className={
+                        basicInfoForm.formState.errors.name
+                          ? "border-destructive"
+                          : ""
+                      }
                     />
                     {basicInfoForm.formState.errors.name && (
                       <p className="text-sm text-destructive">
@@ -442,10 +494,20 @@ export default function AddProduct() {
                       Category *
                     </Label>
                     <Select
-                      onValueChange={(value) => basicInfoForm.setValue("category", value, { shouldValidate: true })}
+                      onValueChange={(value) =>
+                        basicInfoForm.setValue("category", value, {
+                          shouldValidate: true,
+                        })
+                      }
                       value={basicInfoForm.watch("category")}
                     >
-                      <SelectTrigger className={basicInfoForm.formState.errors.category ? "border-destructive" : ""}>
+                      <SelectTrigger
+                        className={
+                          basicInfoForm.formState.errors.category
+                            ? "border-destructive"
+                            : ""
+                        }
+                      >
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
@@ -471,7 +533,11 @@ export default function AddProduct() {
                       id="brand"
                       placeholder="Enter product brand"
                       {...basicInfoForm.register("brand")}
-                      className={basicInfoForm.formState.errors.brand ? "border-destructive" : ""}
+                      className={
+                        basicInfoForm.formState.errors.brand
+                          ? "border-destructive"
+                          : ""
+                      }
                     />
                     {basicInfoForm.formState.errors.brand && (
                       <p className="text-sm text-destructive">
@@ -480,9 +546,7 @@ export default function AddProduct() {
                     )}
                   </div>
 
-                 
                   <div className="space-y-2">
-                   
                     <div className="flex items-center">
                       <Input
                         id="image"
@@ -493,9 +557,13 @@ export default function AddProduct() {
                           if (file) {
                             const reader = new FileReader();
                             reader.onload = (event) => {
-                              basicInfoForm.setValue("image", (event.target?.result as string) || "", {
-                                shouldValidate: true,
-                              });
+                              basicInfoForm.setValue(
+                                "image",
+                                (event.target?.result as string) || "",
+                                {
+                                  shouldValidate: true,
+                                }
+                              );
                             };
                             reader.readAsDataURL(file);
                           }
@@ -515,7 +583,6 @@ export default function AddProduct() {
                       </p>
                     )}
                   </div>
-
                 </div>
               </div>
             )}
@@ -528,7 +595,7 @@ export default function AddProduct() {
                 <div className="grid grid-cols-[1fr_2fr_auto] gap-4 px-4">
                   <Label>Option *</Label>
                   <Label>Values *</Label>
-                  <span></span> 
+                  <span></span>
                 </div>
 
                 <div className="space-y-4">
@@ -538,26 +605,31 @@ export default function AddProduct() {
                         key={vIdx}
                         className="grid grid-cols-[1fr_2fr_auto] gap-4 items-center p-4"
                       >
-                      
                         <Input
                           placeholder="e.g. Size, Color"
-                          value={variantsForm.watch(`variants.${vIdx}.name`) || ""}
+                          value={
+                            variantsForm.watch(`variants.${vIdx}.name`) || ""
+                          }
                           onChange={(e) =>
-                            variantsForm.setValue(`variants.${vIdx}.name`, e.target.value, {
-                              shouldValidate: true,
-                            })
+                            variantsForm.setValue(
+                              `variants.${vIdx}.name`,
+                              e.target.value,
+                              {
+                                shouldValidate: true,
+                              }
+                            )
                           }
                           className={
                             variantsForm.formState.errors.variants?.[vIdx]?.name
                               ? "border-destructive"
                               : ""
                           }
-
                         />
 
-                      
                         <TagInput
-                          value={variantsForm.watch(`variants.${vIdx}.values`) || []}
+                          value={
+                            variantsForm.watch(`variants.${vIdx}.values`) || []
+                          }
                           onChange={(newValues: any) =>
                             variantsForm.setValue(
                               `variants.${vIdx}.values`,
@@ -566,16 +638,18 @@ export default function AddProduct() {
                             )
                           }
                           placeholder={
-                            v.name?.toLowerCase() === "size" ? "e.g. M" : "e.g. Black"
+                            v.name?.toLowerCase() === "size"
+                              ? "e.g. M"
+                              : "e.g. Black"
                           }
                           className={
-                            variantsForm.formState.errors.variants?.[vIdx]?.values
+                            variantsForm.formState.errors.variants?.[vIdx]
+                              ?.values
                               ? "border-destructive"
                               : ""
                           }
                         />
 
-                       
                         <button
                           type="button"
                           onClick={() => removeVariant(vIdx)}
@@ -585,23 +659,24 @@ export default function AddProduct() {
                         </button>
                       </div>
                       <div>
-                        {variantsForm.formState.errors.variants?.[vIdx]?.name && (
+                        {variantsForm.formState.errors.variants?.[vIdx]
+                          ?.name && (
                           <p className="text-sm text-destructive pl-4 -mt-4">
                             {`${variantsForm.formState.errors.variants?.[vIdx]?.name?.message} And ${variantsForm.formState.errors.variants?.[vIdx]?.values?.message}`}
                           </p>
                         )}
                       </div>
                     </>
-
                   ))}
 
-
-                 
-                  <Button type="button" onClick={addVariant} className="bg-white text-blue-500">
+                  <Button
+                    type="button"
+                    onClick={addVariant}
+                    className="bg-white text-blue-500"
+                  >
                     <span className="text-2xl -mt-1">+</span>Add Option
                   </Button>
 
-               
                   {variantsForm.formState.errors.variants && (
                     <p className="text-sm text-destructive">
                       {(variantsForm.formState.errors.variants as any)?.message}
@@ -611,14 +686,12 @@ export default function AddProduct() {
               </div>
             )}
 
-           
             {currentStep === 3 && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold">Combinations</h2>
 
                 {generatedCombinations.length > 0 ? (
                   <div className="space-y-4">
-                 
                     <div className="grid md:grid-cols-6 gap-4 px-4">
                       <Label className="col-span-1"></Label>
                       <Label className="col-span-2">SKU *</Label>
@@ -628,11 +701,15 @@ export default function AddProduct() {
 
                     {generatedCombinations.map((combo, cIdx) => {
                       const name = combo.map((c) => c.value).join("/");
-                      const currentSku = combinationsForm.watch(`combinations.${cIdx}.sku`) || "";
+                      const currentSku =
+                        combinationsForm.watch(`combinations.${cIdx}.sku`) ||
+                        "";
 
                       // Checking for duplicate SKUs
-                      const allSkus = generatedCombinations.map((_, idx) =>
-                        combinationsForm.watch(`combinations.${idx}.sku`) || ""
+                      const allSkus = generatedCombinations.map(
+                        (_, idx) =>
+                          combinationsForm.watch(`combinations.${idx}.sku`) ||
+                          ""
                       );
                       const isDuplicate =
                         currentSku &&
@@ -652,7 +729,9 @@ export default function AddProduct() {
                             />
                             <input
                               type="hidden"
-                              {...combinationsForm.register(`combinations.${cIdx}.name`)}
+                              {...combinationsForm.register(
+                                `combinations.${cIdx}.name`
+                              )}
                               value={name}
                             />
                           </div>
@@ -661,24 +740,32 @@ export default function AddProduct() {
                           <div className="col-span-2">
                             <Input
                               placeholder="e.g. ABC12"
-                              {...combinationsForm.register(`combinations.${cIdx}.sku`, {
-                                required: true,
-                              })}
+                              {...combinationsForm.register(
+                                `combinations.${cIdx}.sku`,
+                                {
+                                  required: true,
+                                }
+                              )}
                               className={
                                 isDuplicate ||
-                                  combinationsForm.formState.errors.combinations?.[cIdx]?.sku
+                                combinationsForm.formState.errors
+                                  .combinations?.[cIdx]?.sku
                                   ? "border-destructive"
                                   : ""
                               }
                             />
                             {isDuplicate && (
-                              <p className="text-sm text-destructive">Duplicate SKU</p>
+                              <p className="text-sm text-destructive">
+                                Duplicate SKU
+                              </p>
                             )}
-                            {combinationsForm.formState.errors.combinations?.[cIdx]?.sku && (
+                            {combinationsForm.formState.errors.combinations?.[
+                              cIdx
+                            ]?.sku && (
                               <p className="text-sm text-destructive">
                                 {
-                                  combinationsForm.formState.errors.combinations?.[cIdx]?.sku
-                                    ?.message
+                                  combinationsForm.formState.errors
+                                    .combinations?.[cIdx]?.sku?.message
                                 }
                               </p>
                             )}
@@ -687,55 +774,92 @@ export default function AddProduct() {
                           {/* In Stock */}
                           <div className="col-span-1">
                             <div className="">
-                          <Switch
-  checked={!!combinationsForm.watch(`combinations.${cIdx}.inStock`)}
-  onCheckedChange={(val) => {
-    combinationsForm.setValue(`combinations.${cIdx}.inStock`, val, {
-      shouldValidate: true,
-    });
-    if (!val) {
-      combinationsForm.setValue(`combinations.${cIdx}.quantity`, null, {
-        shouldValidate: true,
-      });
-    }
-  }}
-/>
-
+                              <Switch
+                                checked={
+                                  !!combinationsForm.watch(
+                                    `combinations.${cIdx}.inStock`
+                                  )
+                                }
+                                onCheckedChange={(val) => {
+                                  combinationsForm.setValue(
+                                    `combinations.${cIdx}.inStock`,
+                                    val,
+                                    {
+                                      shouldValidate: true,
+                                    }
+                                  );
+                                  if (!val) {
+                                    combinationsForm.setValue(
+                                      `combinations.${cIdx}.quantity`,
+                                      null,
+                                      {
+                                        shouldValidate: true,
+                                      }
+                                    );
+                                  }
+                                }}
+                              />
                             </div>
                           </div>
 
-   {/* Quantity */}
-<div className="col-span-2">
-  <Input
-    type="number"
-    placeholder="0"
-    disabled={!combinationsForm.watch(`combinations.${cIdx}.inStock`)}
-    value={
-      combinationsForm.watch(`combinations.${cIdx}.inStock`)
-        ? combinationsForm.watch(`combinations.${cIdx}.quantity`) ?? ""
-        : ""
-    }
-    onChange={(e) =>
-      combinationsForm.setValue(
-        `combinations.${cIdx}.quantity`,
-        e.target.value === "" ? null : Number(e.target.value),
-        { shouldValidate: true }
-      )
-    }
-    className={
-      combinationsForm.formState.errors.combinations?.[cIdx]?.quantity
-        ? "border-destructive"
-        : ""
-    }
-  />
-  {combinationsForm.formState.errors.combinations?.[cIdx]?.quantity && (
-    <p className="text-sm text-destructive">
-      {combinationsForm.formState.errors.combinations?.[cIdx]?.quantity?.message}
-    </p>
-  )}
-</div>
-
-                          
+                          {/* Quantity */}
+                          <div className="col-span-2">
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              disabled={
+                                !combinationsForm.watch(
+                                  `combinations.${cIdx}.inStock`
+                                )
+                              }
+                              value={
+                                combinationsForm.watch(
+                                  `combinations.${cIdx}.inStock`
+                                )
+                                  ? combinationsForm.watch(
+                                      `combinations.${cIdx}.quantity`
+                                    ) ?? ""
+                                  : ""
+                              }
+                              onChange={(e) => {
+                                if (
+                                  !combinationsForm.watch(
+                                    `combinations.${cIdx}.inStock`
+                                  )
+                                ) {
+                                  combinationsForm.setValue(
+                                    `combinations.${cIdx}.quantity`,
+                                    null,
+                                    { shouldValidate: true }
+                                  );
+                                } else {
+                                  combinationsForm.setValue(
+                                    `combinations.${cIdx}.quantity`,
+                                    e.target.value === ""
+                                      ? null
+                                      : Number(e.target.value),
+                                    { shouldValidate: true }
+                                  );
+                                }
+                              }}
+                              className={
+                                combinationsForm.formState.errors
+                                  .combinations?.[cIdx]?.quantity
+                                  ? "border-destructive"
+                                  : ""
+                              }
+                            />
+                            {combinationsForm.formState.errors.combinations?.[
+                              cIdx
+                            ]?.quantity && (
+                              <p className="text-sm text-destructive">
+                                {
+                                  combinationsForm.formState.errors
+                                    .combinations?.[cIdx]?.quantity?.message
+                                }
+                              </p>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -746,10 +870,8 @@ export default function AddProduct() {
                   </p>
                 )}
               </div>
-
             )}
 
-          
             {currentStep === 4 && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold">Price Info</h2>
@@ -765,11 +887,19 @@ export default function AddProduct() {
                       step="0.01"
                       placeholder="0.00"
                       defaultValue={0}
-                      {...priceForm.register("priceInr", { valueAsNumber: true })}
-                      className={priceForm.formState.errors.priceInr ? "border-destructive" : ""}
+                      {...priceForm.register("priceInr", {
+                        valueAsNumber: true,
+                      })}
+                      className={
+                        priceForm.formState.errors.priceInr
+                          ? "border-destructive"
+                          : ""
+                      }
                     />
                     {priceForm.formState.errors.priceInr && (
-                      <p className="text-sm text-destructive">{priceForm.formState.errors.priceInr.message}</p>
+                      <p className="text-sm text-destructive">
+                        {priceForm.formState.errors.priceInr.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -788,7 +918,7 @@ export default function AddProduct() {
                           "discount",
                           {
                             method: currentDiscount?.method || "pct",
-                            value: Number(e.target.value) || 0
+                            value: Number(e.target.value) || 0,
                           },
                           { shouldValidate: true }
                         );
@@ -798,17 +928,19 @@ export default function AddProduct() {
                     <div className="flex rounded-md border bg-muted text-sm font-medium">
                       <button
                         type="button"
-                        className={`px-3 py-1.5 rounded-l-md ${priceForm.watch("discount")?.method === "pct"
-                          ? "bg-primary text-white"
-                          : "text-muted-foreground"
-                          }`}
+                        className={`px-3 py-1.5 rounded-l-md ${
+                          priceForm.watch("discount")?.method === "pct"
+                            ? "bg-primary text-white"
+                            : "text-muted-foreground"
+                        }`}
                         onClick={() => {
-                          const currentDiscount = priceForm.getValues("discount");
+                          const currentDiscount =
+                            priceForm.getValues("discount");
                           priceForm.setValue(
                             "discount",
                             {
                               method: "pct" as const,
-                              value: currentDiscount?.value || 0
+                              value: currentDiscount?.value || 0,
                             },
                             { shouldValidate: true }
                           );
@@ -818,17 +950,19 @@ export default function AddProduct() {
                       </button>
                       <button
                         type="button"
-                        className={`px-3 py-1.5 rounded-r-md ${priceForm.watch("discount")?.method === "flat"
-                          ? "bg-primary text-white"
-                          : "text-muted-foreground"
-                          }`}
+                        className={`px-3 py-1.5 rounded-r-md ${
+                          priceForm.watch("discount")?.method === "flat"
+                            ? "bg-primary text-white"
+                            : "text-muted-foreground"
+                        }`}
                         onClick={() => {
-                          const currentDiscount = priceForm.getValues("discount");
+                          const currentDiscount =
+                            priceForm.getValues("discount");
                           priceForm.setValue(
                             "discount",
                             {
                               method: "flat" as const,
-                              value: currentDiscount?.value || 0
+                              value: currentDiscount?.value || 0,
                             },
                             { shouldValidate: true }
                           );
@@ -841,8 +975,6 @@ export default function AddProduct() {
                 </div>
               </div>
             )}
-
-
           </CardContent>
         </Card>
       </div>
