@@ -1,0 +1,58 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Production
+*.log
+*.tsbuildinfo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Testing
+coverage/
+jest-coverage/
+*.lcov
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Parcel or Vite cache
+.cache/
+.vite/
+
+# Yarn / npm
+yarn-error.log
+yarn-debug.log*
+npm-debug.log*
+
+# Mac trash folder
+.Trashes
+
+# Storybook
+.out/
+storybook-static/
+
+# Optional: if using Docker
+docker-compose.override.yml
+*.local
+
+# Optional: Next.js static export (if misused in config)
+out/
+
+# Optional: If you use ESLint cache
+.eslintcache
